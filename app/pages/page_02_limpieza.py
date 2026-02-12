@@ -35,7 +35,7 @@ def render():
                 'Porcentaje': quality_report['null_pct'].values
             })
             null_df = null_df[null_df['Valores Nulos'] > 0]
-            st.dataframe(null_df, width='stretch')
+            st.dataframe(null_df, use_container_width=True)
         
         # Opciones de limpieza
         st.markdown("### ⚙️ Configuración de Limpieza")
@@ -68,7 +68,7 @@ def render():
             )
         
         # Botón de limpieza
-        if st.button("🧹 Limpiar Datos", type="primary", width='stretch'):
+        if st.button("🧹 Limpiar Datos", type="primary", use_container_width=True):
             with st.spinner("Limpiando datos..."):
                 data_clean = clean_data(
                     data,
@@ -100,4 +100,4 @@ def render():
                 col3.metric("NaN Restantes", nan_count, delta=int(-quality_report['nulls'].sum() + nan_count))
                 
                 st.markdown("### 👁️ Vista Previa de Datos Limpios")
-                st.dataframe(data_clean.head(10), width='stretch')
+                st.dataframe(data_clean.head(10), use_container_width=True)

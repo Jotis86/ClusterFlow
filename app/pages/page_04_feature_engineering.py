@@ -66,7 +66,7 @@ def render():
                 })
             
             var_df = pd.DataFrame(var_info)
-            st.dataframe(var_df, width='stretch')
+            st.dataframe(var_df, use_container_width=True)
         
         with col2:
             st.metric("Total Variables Numéricas", len(numeric_cols))
@@ -79,11 +79,11 @@ def render():
         col_a, col_b, col_c = st.columns(3)
         
         with col_a:
-            if st.button("✅ Seleccionar Todas", width='stretch'):
+            if st.button("✅ Seleccionar Todas", use_container_width=True):
                 st.session_state.selected_features = numeric_cols
         
         with col_b:
-            if st.button("🧠 Selección Inteligente", width='stretch', type="primary"):
+            if st.button("🧠 Selección Inteligente", use_container_width=True, type="primary"):
                 # SELECCIÓN AUTOMÁTICA INTELIGENTE
                 selected = []
                 
@@ -136,7 +136,7 @@ def render():
                 st.rerun()
         
         with col_c:
-            if st.button("🔄 Limpiar Selección", width='stretch'):
+            if st.button("🔄 Limpiar Selección", use_container_width=True):
                 st.session_state.selected_features = []
         
         # Inicializar selección
@@ -162,7 +162,7 @@ def render():
             
             # Vista previa de datos seleccionados
             st.markdown("#### 👁️ Vista Previa de Variables Seleccionadas")
-            st.dataframe(data[selected_features].head(10), width='stretch')
+            st.dataframe(data[selected_features].head(10), use_container_width=True)
         else:
             st.warning("⚠️ No hay variables seleccionadas")
     
@@ -220,7 +220,7 @@ def render():
                 pairs_df = pd.DataFrame(multicollinear_pairs)
                 pairs_df = pairs_df.sort_values('Correlación Abs', ascending=False)
                 st.dataframe(pairs_df[['Variable 1', 'Variable 2', 'Correlación']], 
-                           width='stretch')
+                           use_container_width=True)
                 
                 st.info("""
                 💡 **Recomendación:** Considera eliminar una variable de cada par para reducir redundancia.
@@ -330,7 +330,7 @@ def render():
         
         st.dataframe(
             display_df.style.apply(highlight_variance, axis=1),
-            width='stretch'
+            use_container_width=True
         )
         
         if len(low_variance) > 0:

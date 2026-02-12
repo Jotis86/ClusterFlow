@@ -40,7 +40,7 @@ def render():
                 
                 # Vista previa
                 st.markdown("### 👁️ Vista Previa de Datos")
-                st.dataframe(data.head(10), width='stretch')
+                st.dataframe(data.head(10), use_container_width=True)
                 
                 # Tipos de datos
                 st.markdown("### 🔢 Tipos de Datos")
@@ -50,7 +50,7 @@ def render():
                     'Valores Únicos': [data[col].nunique() for col in data.columns],
                     'Valores Nulos': [data[col].isnull().sum() for col in data.columns]
                 })
-                st.dataframe(dtype_df, width='stretch')
+                st.dataframe(dtype_df, use_container_width=True)
     
     with col2:
         if uploaded_file is not None and st.session_state.data is not None:

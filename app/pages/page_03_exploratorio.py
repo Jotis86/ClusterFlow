@@ -49,16 +49,16 @@ def render():
         
         with col1:
             st.markdown("#### Resumen General")
-            st.dataframe(data[numeric_cols].describe(), width='stretch')
+            st.dataframe(data[numeric_cols].describe(), use_container_width=True)
         
         with col2:
             st.markdown("#### Asimetría y Curtosis")
             skew_kurt = calculate_skewness_kurtosis(data, numeric_cols)
-            st.dataframe(skew_kurt, width='stretch')
+            st.dataframe(skew_kurt, use_container_width=True)
         
         st.markdown("#### Estadísticas de Varianza")
         variance_stats = calculate_variance_stats(data, numeric_cols)
-        st.dataframe(variance_stats, width='stretch')
+        st.dataframe(variance_stats, use_container_width=True)
     
     # TAB 2: Distribuciones
     with tab2:
@@ -229,7 +229,7 @@ def render():
             else:
                 st.success("✅ No se detectaron outliers significativos en los datos.")
             
-            st.dataframe(outlier_df, width='stretch')
+            st.dataframe(outlier_df, use_container_width=True)
     
     # TAB 4: Correlaciones
     with tab4:
@@ -269,7 +269,7 @@ def render():
             corr_pairs = get_correlation_pairs(corr_matrix, threshold=threshold)
             
             if len(corr_pairs) > 0:
-                st.dataframe(corr_pairs, width='stretch')
+                st.dataframe(corr_pairs, use_container_width=True)
                 
                 if len(corr_pairs) > 0:
                     st.info(f"💡 Encontradas {len(corr_pairs)} pares con correlación > {threshold}")

@@ -88,7 +88,7 @@ def render():
         st.metric("Variables a Escalar", len(columns_to_scale))
         st.metric("Filas", len(data))
         
-        if st.button("🔄 Cambiar Variables", width='stretch'):
+        if st.button("🔄 Cambiar Variables", use_container_width=True):
             st.info("Ve a la sección **Feature Engineering** para cambiar la selección de variables")
     
     # Mostrar variables que se escalarán
@@ -102,17 +102,17 @@ def render():
     
     with col_a:
         st.markdown("#### Primeras 5 filas")
-        st.dataframe(data[columns_to_scale].head(), width='stretch')
+        st.dataframe(data[columns_to_scale].head(), use_container_width=True)
     
     with col_b:
         st.markdown("#### Estadísticas")
         stats_original = data[columns_to_scale].describe().loc[['mean', 'std', 'min', 'max']]
-        st.dataframe(stats_original, width='stretch')
+        st.dataframe(stats_original, use_container_width=True)
     
     # Botón de escalado
     st.markdown("### 🚀 Ejecutar Escalado")
     
-    if st.button("📏 Escalar Datos", type="primary", width='stretch'):
+    if st.button("📏 Escalar Datos", type="primary", use_container_width=True):
         with st.spinner(f"Aplicando {settings.AVAILABLE_SCALERS[scaler_type]}..."):
             scaled_df, scaler = scale_data(data, scaler_type, columns_to_scale)
             
@@ -134,12 +134,12 @@ def render():
                 
                 with col1:
                     st.markdown("#### 📋 Datos Escalados")
-                    st.dataframe(scaled_df.head(), width='stretch')
+                    st.dataframe(scaled_df.head(), use_container_width=True)
                 
                 with col2:
                     st.markdown("#### 📈 Estadísticas Escaladas")
                     stats_scaled = scaled_df.describe().loc[['mean', 'std', 'min', 'max']]
-                    st.dataframe(stats_scaled, width='stretch')
+                    st.dataframe(stats_scaled, use_container_width=True)
                 
                 # Visualización comparativa
                 st.markdown("### 📉 Visualización Comparativa")
@@ -194,7 +194,7 @@ def render():
                     })
                 
                 comparison_df = pd.DataFrame(comparison_data)
-                st.dataframe(comparison_df, width='stretch')
+                st.dataframe(comparison_df, use_container_width=True)
                 
                 st.markdown("""
                 <div class="success-box">
@@ -214,4 +214,4 @@ def render():
         col3.metric("Filas", len(st.session_state.data_scaled))
         
         st.markdown("#### 👁️ Vista Previa de Datos Escalados")
-        st.dataframe(st.session_state.data_scaled.head(10), width='stretch')
+        st.dataframe(st.session_state.data_scaled.head(10), use_container_width=True)

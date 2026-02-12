@@ -61,7 +61,7 @@ def render():
                 step=1
             )
         
-        if st.button("🔍 Calcular K Óptimo", type="primary", width='stretch'):
+        if st.button("🔍 Calcular K Óptimo", type="primary", use_container_width=True):
             with st.spinner("Calculando métricas para diferentes valores de K..."):
                 optimal_k, metrics_df, inertia_reduction = determine_optimal_k(
                     data_scaled, 
@@ -90,7 +90,7 @@ def render():
                 
                 st.dataframe(
                     display_metrics.style.apply(highlight_optimal, axis=1),
-                    width='stretch'
+                    use_container_width=True
                 )
                 
                 # Visualizaciones
@@ -150,7 +150,7 @@ def render():
                         'A k': list(range(k_min + 1, k_max + 1)),
                         'Reducción (%)': [f"{r:.2f}%" for r in inertia_reduction]
                     })
-                    st.dataframe(reduction_df, width='stretch')
+                    st.dataframe(reduction_df, use_container_width=True)
         
         # Mostrar resultados si ya existen
         elif 'optimal_k' in st.session_state:
@@ -191,7 +191,7 @@ def render():
                 index=0
             )
         
-        if st.button("🎯 Ejecutar Clustering", type="primary", width='stretch'):
+        if st.button("🎯 Ejecutar Clustering", type="primary", use_container_width=True):
             with st.spinner(f"Ejecutando clustering con {n_clusters} clusters..."):
                 result = perform_clustering(data_scaled, n_clusters, clustering_method)
                 
@@ -224,7 +224,7 @@ def render():
                         'Cantidad': distribution.values,
                         'Porcentaje': [f"{v*100:.1f}%" for v in distribution.values]
                     })
-                    st.dataframe(dist_df, width='stretch')
+                    st.dataframe(dist_df, use_container_width=True)
                     
                     max_pct = result['max_cluster_pct']
                     if max_pct > 0.8:
@@ -291,7 +291,7 @@ def render():
             }[x]
         )
         
-        if st.button("🔬 Comparar Métodos", type="primary", width='stretch'):
+        if st.button("🔬 Comparar Métodos", type="primary", use_container_width=True):
             if len(methods_to_compare) < 2:
                 st.warning("⚠️ Selecciona al menos 2 métodos para comparar")
             else:
@@ -334,7 +334,7 @@ def render():
                     
                     st.dataframe(
                         display_comparison.style.apply(highlight_best, axis=1),
-                        width='stretch'
+                        use_container_width=True
                     )
                     
                     # Gráfico de radar
@@ -366,7 +366,7 @@ def render():
                     plt.close()
                     
                     # Guardar mejor resultado
-                    if st.button("✅ Usar Mejor Método", width='stretch'):
+                    if st.button("✅ Usar Mejor Método", use_container_width=True):
                         st.session_state.cluster_results = results_dict[best_method]
                         st.session_state.n_clusters_used = compare_k
                         st.session_state.method_used = best_method

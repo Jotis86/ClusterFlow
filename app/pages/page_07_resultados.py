@@ -188,7 +188,7 @@ def render():
             })
         
         summary_df = pd.DataFrame(summary_data)
-        st.dataframe(summary_df, width='stretch', height=250)
+        st.dataframe(summary_df, use_container_width=True, height=250)
         
         # Métricas de calidad compactas
         st.markdown("#### 📏 Métricas de Calidad")
@@ -207,7 +207,7 @@ def render():
             ]
         })
         
-        st.dataframe(metrics_compact, width='stretch')
+        st.dataframe(metrics_compact, use_container_width=True)
     
     st.markdown("---")
     
@@ -231,7 +231,7 @@ def render():
             data=csv_data,
             file_name=f"clusters_{timestamp}.csv",
             mime="text/csv",
-            width='stretch'
+            use_container_width=True
         )
     
     with col2:
@@ -256,7 +256,7 @@ def render():
             data=csv_profiles,
             file_name=f"profiles_{timestamp}.csv",
             mime="text/csv",
-            width='stretch'
+            use_container_width=True
         )
     
     with col3:
@@ -281,7 +281,7 @@ def render():
             data=csv_metrics,
             file_name=f"metrics_{timestamp}.csv",
             mime="text/csv",
-            width='stretch'
+            use_container_width=True
         )
     
     st.markdown("---")
