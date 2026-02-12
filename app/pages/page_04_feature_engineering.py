@@ -39,10 +39,10 @@ def render():
         
         st.info("""
         💡 **Recomendaciones:**
-        - Usa **🧠 Selección Inteligente** para una selección automática óptima
-        - El algoritmo excluye: IDs, variables constantes, baja varianza, alta correlación
         - Selecciona variables numéricas relevantes para el clustering
         - El clustering funciona mejor con 2-10 variables
+        - Evita incluir IDs o variables constantes
+        - Considera la varianza y correlación entre variables
         """)
         
         # Variables disponibles
@@ -76,66 +76,13 @@ def render():
         st.markdown("#### 🎯 Seleccionar Variables para Clustering")
         
         # Opciones de preselección
-        col_a, col_b, col_c = st.columns(3)
+        col_a, col_b = st.columns(2)
         
         with col_a:
             if st.button("✅ Seleccionar Todas", use_container_width=True):
                 st.session_state.selected_features = numeric_cols
         
         with col_b:
-            if st.button("🧠 Selección Inteligente", use_container_width=True, type="primary"):
-                # SELECCIÓN AUTOMÁTICA INTELIGENTE
-                selected = []
-                
-                # 1. Excluir variables tipo ID (bajo número de valores únicos o secuencial)
-                for col in numeric_cols:
-                    unique_ratio = data[col].nunique() / len(data)
-                    
-                    # Excluir si parece un ID
-                    if 'id' in col.lower():
-                        continue
-                    
-                    # Excluir si tiene énicamente valores únicos (probablemente ID)
-                    if unique_ratio > 0.95:
-                        continue
-                    
-                    # Excluir si tiene muy pocos valores únicos (menos de 5)
-                    if data[col].nunique() < 5:
-                        continue
-                    
-                    # 2. Verificar varianza significativa (CV > 10%)
-                    if data[col].std() > 0:
-                        cv = (data[col].std() / abs(data[col].mean())) * 100 if data[col].mean() != 0 else 0
-                        if cv < 10:  # Baja varianza
-                            continue
-                    
-                    selected.append(col)
-                
-                # 3. Si hay más de 10, seleccionar las de mayor varianza
-                if len(selected) > 10:
-                    variances = {col: data[col].var() for col in selected}
-                    selected = sorted(variances, key=variances.get, reverse=True)[:10]
-                
-                # 4. Eliminar variables altamente correlacionadas (> 0.9)
-                corr_excluded = 0
-                if len(selected) > 1:
-                    corr_matrix = data[selected].corr().abs()
-                    upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
-                    to_drop = [column for column in upper.columns if any(upper[column] > 0.9)]
-                    corr_excluded = len(to_drop)
-                    selected = [col for col in selected if col not in to_drop]
-                
-                # Guardar información para mostrar después
-                excluded_count = len(numeric_cols) - len(selected)
-                st.session_state.intelligent_selection_info = {
-                    'used': True
-                }
-                
-                st.session_state.selected_features = selected
-                st.success(f"✅ {len(selected)} variables seleccionadas automáticamente ({excluded_count} excluidas)")
-                st.rerun()
-        
-        with col_c:
             if st.button("🔄 Limpiar Selección", use_container_width=True):
                 st.session_state.selected_features = []
         
@@ -148,17 +95,13 @@ def render():
             numeric_cols,
             default=st.session_state.selected_features,
             key="feature_selector",
-            help="🧠 Usa 'Selección Inteligente' para una selección automática basada en criterios estadísticos"
+            help="Selecciona las variables numéricas que deseas usar para el clustering"
         )
         
         st.session_state.selected_features = selected_features
         
         if len(selected_features) > 0:
-            # Mostrar badge si se usó selección inteligente
-            if st.session_state.get('intelligent_selection_info', {}).get('used'):
-                st.success(f"✅ {len(selected_features)} variables seleccionadas (🧠 Selección Inteligente Aplicada)")
-            else:
-                st.success(f"✅ {len(selected_features)} variables seleccionadas")
+            st.success(f"✅ {len(selected_features)} variables seleccionadas")
             
             # Vista previa de datos seleccionados
             st.markdown("#### 👁️ Vista Previa de Variables Seleccionadas")
