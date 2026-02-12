@@ -92,7 +92,18 @@ def calculate_variance_stats(df: pd.DataFrame, columns: list) -> pd.DataFrame:
         DataFrame con estadísticas incluyendo CV (coeficiente de variación)
     """
     stats_df = df[columns].describe().T
-    stats_df['CV (%)'] = (stats_df['std'] / stats_df['mean'] * 100).round(2)
+    
+    # Calcular CV con manejo de división por cero
+    cv_values = []
+    for col in stats_df.index:
+        mean_val = stats_df.loc[col, 'mean']
+        std_val = stats_df.loc[col, 'std']
+        if mean_val != 0 and not pd.isna(mean_val):
+            cv_values.append(round((std_val / abs(mean_val)) * 100, 2))
+        else:
+            cv_values.append(0.0)
+    
+    stats_df['CV (%)'] = cv_values
     stats_df['Rango'] = (stats_df['max'] - stats_df['min']).round(2)
     
     return stats_df

@@ -63,17 +63,24 @@ def render():
         
         if st.button("🔍 Calcular K Óptimo", type="primary", use_container_width=True):
             with st.spinner("Calculando métricas para diferentes valores de K..."):
-                optimal_k, metrics_df, inertia_reduction = determine_optimal_k(
-                    data_scaled, 
-                    (k_min, k_max + 1)
-                )
-                
-                # Guardar resultados
-                st.session_state.optimal_k = optimal_k
-                st.session_state.k_metrics = metrics_df
-                st.session_state.inertia_reduction = inertia_reduction
-                
-                st.success(f"✅ K óptimo determinado: **{optimal_k}** clusters")
+                try:
+                    optimal_k, metrics_df, inertia_reduction = determine_optimal_k(
+                        data_scaled, 
+                        (k_min, k_max + 1)
+                    )
+                    
+                    # Guardar resultados
+                    st.session_state.optimal_k = optimal_k
+                    st.session_state.k_metrics = metrics_df
+                    st.session_state.inertia_reduction = inertia_reduction
+                    
+                    st.success(f"✅ K óptimo determinado: **{optimal_k}** clusters")
+                except ValueError as e:
+                    st.error(f"❌ Error: {str(e)}")
+                    st.info("💡 Sugerencia: Asegúrate de tener suficientes datos para el rango de K seleccionado.")
+                except Exception as e:
+                    st.error(f"❌ Error inesperado al calcular K óptimo: {str(e)}")
+                    st.info("💡 Intenta con un rango de K diferente o verifica que los datos estén correctos.")
                 
                 # Mostrar métricas
                 st.markdown("### 📊 Métricas por Valor de K")
@@ -193,14 +200,21 @@ def render():
         
         if st.button("🎯 Ejecutar Clustering", type="primary", use_container_width=True):
             with st.spinner(f"Ejecutando clustering con {n_clusters} clusters..."):
-                result = perform_clustering(data_scaled, n_clusters, clustering_method)
-                
-                # Guardar resultados
-                st.session_state.cluster_results = result
-                st.session_state.n_clusters_used = n_clusters
-                st.session_state.method_used = clustering_method
-                
-                st.success(settings.MESSAGES['clustering_success'])
+                try:
+                    result = perform_clustering(data_scaled, n_clusters, clustering_method)
+                    
+                    # Guardar resultados
+                    st.session_state.cluster_results = result
+                    st.session_state.n_clusters_used = n_clusters
+                    st.session_state.method_used = clustering_method
+                    
+                    st.success(settings.MESSAGES['clustering_success'])
+                except ValueError as e:
+                    st.error(f"❌ Error: {str(e)}")
+                    st.info("💡 Sugerencia: Verifica que tengas suficientes datos y que el número de clusters sea apropiado.")
+                except Exception as e:
+                    st.error(f"❌ Error inesperado durante clustering: {str(e)}")
+                    st.info("💡 Intenta con un número diferente de clusters o verifica que los datos estén escalados correctamente.")
                 
                 # Mostrar métricas
                 st.markdown("### 📊 Métricas del Clustering")
@@ -296,78 +310,86 @@ def render():
                 st.warning("⚠️ Selecciona al menos 2 métodos para comparar")
             else:
                 with st.spinner("Ejecutando y comparando métodos..."):
-                    results_dict = {}
-                    
-                    progress_bar = st.progress(0)
-                    for idx, method in enumerate(methods_to_compare):
-                        result = perform_clustering(data_scaled, compare_k, method)
-                        results_dict[method] = result
-                        progress_bar.progress((idx + 1) / len(methods_to_compare))
-                    
-                    progress_bar.empty()
-                    
-                    # Seleccionar mejor método
-                    best_method, comparison_df = select_best_method(results_dict)
-                    
-                    st.success(f"✅ Mejor método: **{best_method.upper()}**")
-                    
-                    # Mostrar comparación
-                    st.markdown("### 📊 Tabla Comparativa")
-                    
-                    display_comparison = comparison_df[[
-                        'Método', 'Silhouette', 'Davies-Bouldin', 
-                        'Calinski-Harabasz', 'Max_Cluster_Pct', 'Score_Final'
-                    ]].copy()
-                    
-                    # Formatear valores
-                    display_comparison['Silhouette'] = display_comparison['Silhouette'].round(4)
-                    display_comparison['Davies-Bouldin'] = display_comparison['Davies-Bouldin'].round(4)
-                    display_comparison['Calinski-Harabasz'] = display_comparison['Calinski-Harabasz'].round(2)
-                    display_comparison['Max_Cluster_Pct'] = display_comparison['Max_Cluster_Pct'].apply(lambda x: f"{x*100:.1f}%")
-                    display_comparison['Score_Final'] = display_comparison['Score_Final'].round(2)
-                    
-                    # Destacar mejor método
-                    def highlight_best(row):
-                        if row['Método'] == best_method:
-                            return ['background-color: #90EE90'] * len(row)
-                        return [''] * len(row)
-                    
-                    st.dataframe(
-                        display_comparison.style.apply(highlight_best, axis=1),
-                        use_container_width=True
-                    )
-                    
-                    # Gráfico de radar
-                    st.markdown("### 📈 Comparación Visual")
-                    
-                    fig, ax = plt.subplots(figsize=(10, 6))
-                    
-                    x = np.arange(len(methods_to_compare))
-                    width = 0.25
-                    
-                    silhouettes = [results_dict[m]['silhouette'] for m in methods_to_compare]
-                    davies = [results_dict[m]['davies_bouldin'] for m in methods_to_compare]
-                    calinski = [results_dict[m]['calinski_harabasz'] / 1000 for m in methods_to_compare]  # Escalar
-                    
-                    ax.bar(x - width, silhouettes, width, label='Silhouette', alpha=0.8)
-                    ax.bar(x, davies, width, label='Davies-Bouldin', alpha=0.8)
-                    ax.bar(x + width, calinski, width, label='Calinski/1000', alpha=0.8)
-                    
-                    ax.set_xlabel('Método')
-                    ax.set_ylabel('Valor')
-                    ax.set_title('Comparación de Métricas por Método')
-                    ax.set_xticks(x)
-                    ax.set_xticklabels([m.upper() for m in methods_to_compare], rotation=45)
-                    ax.legend()
-                    ax.grid(alpha=0.3, axis='y')
-                    
-                    plt.tight_layout()
-                    st.pyplot(fig)
-                    plt.close()
-                    
-                    # Guardar mejor resultado
-                    if st.button("✅ Usar Mejor Método", use_container_width=True):
-                        st.session_state.cluster_results = results_dict[best_method]
-                        st.session_state.n_clusters_used = compare_k
-                        st.session_state.method_used = best_method
-                        st.success(f"✅ Resultado de {best_method.upper()} guardado. Ve a **Resultados** para visualizar.")
+                    try:
+                        results_dict = {}
+                        
+                        progress_bar = st.progress(0)
+                        for idx, method in enumerate(methods_to_compare):
+                            result = perform_clustering(data_scaled, compare_k, method)
+                            results_dict[method] = result
+                            progress_bar.progress((idx + 1) / len(methods_to_compare))
+                        
+                        progress_bar.empty()
+                        
+                        # Seleccionar mejor método
+                        best_method, comparison_df = select_best_method(results_dict)
+                        
+                        st.success(f"✅ Mejor método: **{best_method.upper()}**")
+                        
+                        # Mostrar comparación
+                        st.markdown("### 📊 Tabla Comparativa")
+                        
+                        display_comparison = comparison_df[[
+                            'Método', 'Silhouette', 'Davies-Bouldin', 
+                            'Calinski-Harabasz', 'Max_Cluster_Pct', 'Score_Final'
+                        ]].copy()
+                        
+                        # Formatear valores
+                        display_comparison['Silhouette'] = display_comparison['Silhouette'].round(4)
+                        display_comparison['Davies-Bouldin'] = display_comparison['Davies-Bouldin'].round(4)
+                        display_comparison['Calinski-Harabasz'] = display_comparison['Calinski-Harabasz'].round(2)
+                        display_comparison['Max_Cluster_Pct'] = display_comparison['Max_Cluster_Pct'].apply(lambda x: f"{x*100:.1f}%")
+                        display_comparison['Score_Final'] = display_comparison['Score_Final'].round(2)
+                        
+                        # Destacar mejor método
+                        def highlight_best(row):
+                            if row['Método'] == best_method:
+                                return ['background-color: #90EE90'] * len(row)
+                            return [''] * len(row)
+                        
+                        st.dataframe(
+                            display_comparison.style.apply(highlight_best, axis=1),
+                            use_container_width=True
+                        )
+                        
+                        # Gráfico de radar
+                        st.markdown("### 📈 Comparación Visual")
+                        
+                        fig, ax = plt.subplots(figsize=(10, 6))
+                        
+                        x = np.arange(len(methods_to_compare))
+                        width = 0.25
+                        
+                        silhouettes = [results_dict[m]['silhouette'] for m in methods_to_compare]
+                        davies = [results_dict[m]['davies_bouldin'] for m in methods_to_compare]
+                        calinski = [results_dict[m]['calinski_harabasz'] / 1000 for m in methods_to_compare]  # Escalar
+                        
+                        ax.bar(x - width, silhouettes, width, label='Silhouette', alpha=0.8)
+                        ax.bar(x, davies, width, label='Davies-Bouldin', alpha=0.8)
+                        ax.bar(x + width, calinski, width, label='Calinski/1000', alpha=0.8)
+                        
+                        ax.set_xlabel('Método')
+                        ax.set_ylabel('Valor')
+                        ax.set_title('Comparación de Métricas por Método')
+                        ax.set_xticks(x)
+                        ax.set_xticklabels([m.upper() for m in methods_to_compare], rotation=45)
+                        ax.legend()
+                        ax.grid(alpha=0.3, axis='y')
+                        
+                        plt.tight_layout()
+                        st.pyplot(fig)
+                        plt.close()
+                        
+                        # Guardar mejor resultado
+                        if st.button("✅ Usar Mejor Método", use_container_width=True):
+                            st.session_state.cluster_results = results_dict[best_method]
+                            st.session_state.n_clusters_used = compare_k
+                            st.session_state.method_used = best_method
+                            st.success(f"✅ Resultado de {best_method.upper()} guardado. Ve a **Resultados** para visualizar.")
+                        
+                    except ValueError as e:
+                        st.error(f"❌ Error al comparar métodos: {str(e)}")
+                        st.info("💡 Sugerencia: Verifica el número de clusters y que los datos sean válidos.")
+                    except Exception as e:
+                        st.error(f"❌ Error inesperado durante comparación: {str(e)}")
+                        st.info("💡 Intenta con un número diferente de clusters o menos métodos.")

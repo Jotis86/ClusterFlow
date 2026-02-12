@@ -17,10 +17,15 @@ def analyze_data_quality(df: pd.DataFrame) -> Dict:
     Returns:
         Dict con información de calidad: shape, nulls, duplicates, dtypes, etc.
     """
+    try:
+        null_pct = (df.isnull().sum() / len(df) * 100).round(2) if len(df) > 0 else pd.Series()
+    except:
+        null_pct = pd.Series()
+    
     report = {
         'shape': df.shape,
         'nulls': df.isnull().sum(),
-        'null_pct': (df.isnull().sum() / len(df) * 100).round(2),
+        'null_pct': null_pct,
         'duplicates': df.duplicated().sum(),
         'dtypes': df.dtypes,
         'numeric_cols': df.select_dtypes(include=[np.number]).columns.tolist(),
@@ -82,9 +87,13 @@ def clean_data(
     if remove_outliers:
         numeric_cols = df_clean.select_dtypes(include=[np.number]).columns
         for col in numeric_cols:
-            if df_clean[col].isnull().sum() == 0:
-                z_scores = np.abs(zscore(df_clean[col]))
-                df_clean = df_clean[z_scores < outlier_threshold]
+            if df_clean[col].isnull().sum() == 0 and df_clean[col].std() > 0:
+                try:
+                    z_scores = np.abs(zscore(df_clean[col]))
+                    df_clean = df_clean[z_scores < outlier_threshold]
+                except (ValueError, RuntimeWarning):
+                    # Saltar columnas con valores constantes o problemas
+                    continue
     
     # VALIDACIÓN FINAL: Asegurar que no queden NaN en columnas numéricas
     numeric_cols = df_clean.select_dtypes(include=[np.number]).columns

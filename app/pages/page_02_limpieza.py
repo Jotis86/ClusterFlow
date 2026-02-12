@@ -70,34 +70,42 @@ def render():
         # Botón de limpieza
         if st.button("🧹 Limpiar Datos", type="primary", use_container_width=True):
             with st.spinner("Limpiando datos..."):
-                data_clean = clean_data(
-                    data,
-                    remove_duplicates=remove_duplicates,
-                    fill_nulls_method=fill_nulls_method,
-                    remove_outliers=remove_outliers,
-                    outlier_threshold=outlier_threshold
-                )
-                
-                st.session_state.data_clean = data_clean
-                
-                st.success(settings.MESSAGES['data_cleaned'])
-                
-                # VALIDACIÓN: Verificar si quedan NaN en columnas numéricas
-                numeric_cols_clean = data_clean.select_dtypes(include=[np.number]).columns
-                nan_count = data_clean[numeric_cols_clean].isnull().sum().sum()
-                
-                if nan_count > 0:
-                    st.error(f"⚠️ ADVERTENCIA: Aún quedan {nan_count} valores NaN en columnas numéricas. El clustering FALLARÁ.")
-                    st.info("💡 Solución: Vuelve a limpiar los datos seleccionando un método de imputación diferente (mediana, media, o cero).")
-                else:
-                    st.success("✅ No hay valores NaN en columnas numéricas. Los datos están listos para clustering.")
-                
-                # Comparación antes/después
-                col1, col2, col3 = st.columns(3)
-                col1.metric("Filas (Original)", f"{data.shape[0]:,}")
-                col2.metric("Filas (Limpio)", f"{data_clean.shape[0]:,}", 
-                           delta=f"{data_clean.shape[0] - data.shape[0]:,}")
-                col3.metric("NaN Restantes", nan_count, delta=int(-quality_report['nulls'].sum() + nan_count))
-                
-                st.markdown("### 👁️ Vista Previa de Datos Limpios")
-                st.dataframe(data_clean.head(10), use_container_width=True)
+                try:
+                    data_clean = clean_data(
+                        data,
+                        remove_duplicates=remove_duplicates,
+                        fill_nulls_method=fill_nulls_method,
+                        remove_outliers=remove_outliers,
+                        outlier_threshold=outlier_threshold
+                    )
+                    
+                    st.session_state.data_clean = data_clean
+                    
+                    st.success(settings.MESSAGES['data_cleaned'])
+                    
+                    # VALIDACIÓN: Verificar si quedan NaN en columnas numéricas
+                    numeric_cols_clean = data_clean.select_dtypes(include=[np.number]).columns
+                    nan_count = data_clean[numeric_cols_clean].isnull().sum().sum()
+                    
+                    if nan_count > 0:
+                        st.error(f"⚠️ ADVERTENCIA: Aún quedan {nan_count} valores NaN en columnas numéricas. El clustering FALLARÁ.")
+                        st.info("💡 Solución: Vuelve a limpiar los datos seleccionando un método de imputación diferente (mediana, media, o cero).")
+                    else:
+                        st.success("✅ No hay valores NaN en columnas numéricas. Los datos están listos para clustering.")
+                    
+                    # Comparación antes/después
+                    col1, col2, col3 = st.columns(3)
+                    col1.metric("Filas (Original)", f"{data.shape[0]:,}")
+                    col2.metric("Filas (Limpio)", f"{data_clean.shape[0]:,}", 
+                               delta=f"{data_clean.shape[0] - data.shape[0]:,}")
+                    col3.metric("NaN Restantes", nan_count, delta=int(-quality_report['nulls'].sum() + nan_count))
+                    
+                    st.markdown("### 👁️ Vista Previa de Datos Limpios")
+                    st.dataframe(data_clean.head(10), use_container_width=True)
+                    
+                except ValueError as e:
+                    st.error(f"❌ Error durante la limpieza: {str(e)}")
+                    st.info("💡 Sugerencia: Verifica los parámetros de limpieza seleccionados.")
+                except Exception as e:
+                    st.error(f"❌ Error inesperado: {str(e)}")
+                    st.info("💡 Intenta con diferentes opciones de limpieza.")

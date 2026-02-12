@@ -19,6 +19,9 @@ def determine_optimal_k(data: pd.DataFrame, k_range: Tuple[int, int] = (2, 11)) 
     Returns:
         Tuple[k óptimo, DataFrame con métricas, lista de reducciones de inercia]
     """
+    if len(data) < k_range[0]:
+        raise ValueError(f"No hay suficientes datos ({len(data)}) para el número mínimo de clusters ({k_range[0]})")
+    
     K_range = range(k_range[0], k_range[1])
     inertias = []
     silhouette_scores = []
@@ -43,13 +46,16 @@ def determine_optimal_k(data: pd.DataFrame, k_range: Tuple[int, int] = (2, 11)) 
         'Inercia': inertias
     })
     
-    # Normalizar métricas
-    metrics_df['Silhouette_norm'] = (metrics_df['Silhouette'] - metrics_df['Silhouette'].min()) / \
-                                     (metrics_df['Silhouette'].max() - metrics_df['Silhouette'].min())
-    metrics_df['Davies_norm'] = 1 - ((metrics_df['Davies-Bouldin'] - metrics_df['Davies-Bouldin'].min()) / \
-                                      (metrics_df['Davies-Bouldin'].max() - metrics_df['Davies-Bouldin'].min()))
-    metrics_df['Calinski_norm'] = (metrics_df['Calinski-Harabasz'] - metrics_df['Calinski-Harabasz'].min()) / \
-                                   (metrics_df['Calinski-Harabasz'].max() - metrics_df['Calinski-Harabasz'].min())
+    # Normalizar métricas (con manejo de división por cero)
+    def safe_normalize(series):
+        range_val = series.max() - series.min()
+        if range_val == 0:
+            return pd.Series([0.5] * len(series), index=series.index)
+        return (series - series.min()) / range_val
+    
+    metrics_df['Silhouette_norm'] = safe_normalize(metrics_df['Silhouette'])
+    metrics_df['Davies_norm'] = 1 - safe_normalize(metrics_df['Davies-Bouldin'])
+    metrics_df['Calinski_norm'] = safe_normalize(metrics_df['Calinski-Harabasz'])
     
     metrics_df['Score_Compuesto'] = (metrics_df['Silhouette_norm'] + 
                                       metrics_df['Davies_norm'] + 
