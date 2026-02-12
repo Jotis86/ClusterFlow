@@ -1,4 +1,4 @@
-![ClusterFlow Banner](./assets/ClusterFlow.png)
+![ClusterFlow Banner](./assets/banner.png)
 
 # ClusterFlow - Automatic Clustering Application
 
