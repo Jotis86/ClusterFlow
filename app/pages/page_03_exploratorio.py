@@ -296,28 +296,35 @@ def render():
                 )
             
             if var_x and var_y:
-                # Scatter plot
-                fig, ax = plt.subplots(figsize=(10, 6))
-                ax.scatter(data[var_x], data[var_y], alpha=0.6)
-                ax.set_xlabel(var_x)
-                ax.set_ylabel(var_y)
-                ax.set_title(f'{var_x} vs {var_y}')
-                ax.grid(alpha=0.3)
+                # Filtrar datos válidos (sin NaN)
+                valid_mask = data[[var_x, var_y]].notna().all(axis=1)
+                valid_data = data[valid_mask]
                 
-                # Línea de tendencia
-                z = np.polyfit(data[var_x], data[var_y], 1)
-                p = np.poly1d(z)
-                ax.plot(data[var_x], p(data[var_x]), "r--", alpha=0.8, 
-                       label=f'Tendencia: y={z[0]:.2f}x+{z[1]:.2f}')
-                ax.legend()
-                
-                st.pyplot(fig)
-                plt.close()
-                
-                # Estadísticas
-                correlation = data[var_x].corr(data[var_y])
-                
-                col_a, col_b, col_c = st.columns(3)
-                col_a.metric("Correlación", f"{correlation:.4f}")
-                col_b.metric("R²", f"{correlation**2:.4f}")
-                col_c.metric("Tipo", "Positiva" if correlation > 0 else "Negativa")
+                if len(valid_data) < 2:
+                    st.warning(f"⚠️ No hay suficientes datos válidos para visualizar {var_x} vs {var_y}")
+                else:
+                    # Scatter plot
+                    fig, ax = plt.subplots(figsize=(10, 6))
+                    ax.scatter(valid_data[var_x], valid_data[var_y], alpha=0.6)
+                    ax.set_xlabel(var_x)
+                    ax.set_ylabel(var_y)
+                    ax.set_title(f'{var_x} vs {var_y}')
+                    ax.grid(alpha=0.3)
+                    
+                    # Línea de tendencia
+                    z = np.polyfit(valid_data[var_x], valid_data[var_y], 1)
+                    p = np.poly1d(z)
+                    ax.plot(valid_data[var_x], p(valid_data[var_x]), "r--", alpha=0.8, 
+                           label=f'Tendencia: y={z[0]:.2f}x+{z[1]:.2f}')
+                    ax.legend()
+                    
+                    st.pyplot(fig)
+                    plt.close()
+                    
+                    # Estadísticas
+                    correlation = valid_data[var_x].corr(valid_data[var_y])
+                    
+                    col_a, col_b, col_c = st.columns(3)
+                    col_a.metric("Correlación", f"{correlation:.4f}")
+                    col_b.metric("R²", f"{correlation**2:.4f}")
+                    col_c.metric("Tipo", "Positiva" if correlation > 0 else "Negativa")
