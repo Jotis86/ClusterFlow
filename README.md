@@ -108,51 +108,6 @@ Choose scaling method:
 
 ClusterFlow implements a **3-layer modular architecture** designed for scalability and maintainability:
 
-### Directory Structure
-
-```
-ClusterFlow/
-│
-├── app/                          # Main application
-│   ├── main.py                   # Entry point and orchestration
-│   ├── pages/                    # Interface modules (7 pages)
-│   │   ├── page_01_carga_datos.py          # Data loading and validation
-│   │   ├── page_02_limpieza.py              # Cleaning and imputation
-│   │   ├── page_03_exploratorio.py          # EDA with improved visualizations
-│   │   ├── page_04_feature_engineering.py   # Intelligent variable selection
-│   │   ├── page_05_escalado.py              # Data normalization
-│   │   ├── page_06_clustering.py            # Algorithm execution and comparison
-│   │   └── page_07_resultados.py            # PCA visualization and export
-│   │
-│   ├── core/                     # Business logic (processing layer)
-│   │   ├── clustering.py         # Algorithms: KMeans, DBSCAN, Agglomerative
-│   │   ├── data_loader.py        # Data validation and loading
-│   │   ├── data_cleaner.py       # Cleaning, imputation, outliers
-│   │   └── scaler.py             # StandardScaler, MinMaxScaler, RobustScaler
-│   │
-│   ├── utils/                    # Auxiliary utilities
-│   │   └── stats.py              # Statistics: skewness, kurtosis, CV%
-│   │
-│   ├── config/                   # Centralized configuration
-│   │   └── settings.py           # Constants, messages, parameters
-│   │
-│   └── styles/                   # Visual styles
-│       └── custom_css.py         # Custom CSS and banners
-│
-├── tests/                        # Test suite (75 tests)
-│   ├── test_clustering.py        # Algorithm tests
-│   ├── test_data_loader.py       # Loading tests
-│   ├── test_data_cleaner.py      # Cleaning tests
-│   ├── test_scaler.py            # Scaling tests
-│   ├── test_stats.py             # Statistics tests
-│   └── test_integration.py       # Integration tests
-│
-├── requirements.txt              # Python dependencies
-├── pytest.ini                    # Test configuration
-├── docker-compose.yml            # Docker orchestration
-├── Dockerfile                    # Container image
-└── run.bat                       # Windows execution script
-```
 
 ### Architecture Layers
 
@@ -182,11 +137,11 @@ CSV → Load → Clean → EDA → Feature Eng. → Scale → Clustering → Res
 
 ### Key Technologies
 
-- **Framework**: Streamlit 1.49.1
+- **Framework**: Streamlit 
 - **ML**: scikit-learn (clustering, PCA, metrics)
 - **Analysis**: pandas, numpy
 - **Visualization**: matplotlib, seaborn
-- **Testing**: pytest (99.2% coverage)
+- **Testing**: pytest 
 - **Containerization**: Docker + Docker Compose
 
 ---
