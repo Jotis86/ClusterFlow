@@ -1,3 +1,5 @@
+![ClusterFlow Banner](./assets/ClusterFlow.png)
+
 # ClusterFlow - Automatic Clustering Application
 
 ## 📖 Project Description
