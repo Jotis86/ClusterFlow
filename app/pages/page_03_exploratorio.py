@@ -216,9 +216,9 @@ def render():
                 outlier_summary.append({
                     'Variable': col,
                     'Outliers': n_out,
-                    'Porcentaje': f"{(n_out / len(data) * 100):.2f}%",
-                    'Límite Inferior': f"{lower:.2f}",
-                    'Límite Superior': f"{upper:.2f}"
+                    'Porcentaje': f"{(n_out / len(data) * 100):.2f}%" if len(data) > 0 else "0.00%",
+                    'Límite Inferior': f"{lower:.2f}" if not pd.isna(lower) else "N/A",
+                    'Límite Superior': f"{upper:.2f}" if not pd.isna(upper) else "N/A"
                 })
             
             outlier_df = pd.DataFrame(outlier_summary)
